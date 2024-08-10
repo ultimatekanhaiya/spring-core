@@ -1,0 +1,257 @@
+What is Spring?
+1. Spring is a powerful, loosely-coupled, light-weight java framework. 
+2. Spring is a Dependency Injection framework to make java application loosely coupled.
+3. Spring meant for reducing the complexity of developing enterprise-level applications.
+4. It was developed by Rod Johnson in 2003.
+5. It is also called frameworks of frameworks. In Spring there are around 20 modules.
+	Core Container
+	Data Access/Integration
+	Web
+	AOP (Aspect Oriented Programming)
+	Instrumentation
+	Messaging
+	Test
+  
+What is DependencyInjection/InversionOfControl ?
+
+DependencyInjection is a design pattern. In this dependency is injected at runtime.
+In Spring Spring-Container maintains the whole life-cycle of bean(dependency Object). From its creation->maintain->inject at runtime -> destroy.
+As we can see all the responsibility of dependency object is taken from user to Spring hence we call it inversion-of-control.
+If we create an dependency object with new keyword it will increase coupling. And in case if any change required we have to do a lot of work.
+
+
+What is Spring IOC Container?
+Spring IoC container is the program that injects dependencies into an object and make it ready for our use.
+
+---------------- Setter Injection ------------------
+# Way to Define bean property in config.xml
+	1.value as element
+		<property name="studentAddress"> <value>Delhi</value> </property>
+	2. value as attribute
+		<property name="studentAddress" value="Delhi" />
+	3. P(p denotes property) schema
+		<bean class="com.inventApper.demo.Student" name="student1"
+		p:studentId="123" p:studentName="Kamal" p:studentAddress="Delhi" />
+		
+# Way to define bean collection property
+	list/set
+	1. <property name="">
+			<list>
+				<value>10</value>
+				<null>
+			</list>
+		</property>
+	map
+	1. <property name="">
+			<map>
+				<entry key="java" value="2month"/>
+				<entry key="java" value="2month"/>
+			</map>
+		</property>
+	properties
+	1. <property name="">
+			<props>
+				<prop key="name">kamal</prop>
+				<prop key="work">java developer</prop>
+			</props>
+		</property>						
+
+# way to define bean reference property
+
+	#Here object 'A' is dependent on object 'B'
+	#declaring object 'B' bean
+	
+	<bean class="com.springcore.ref.B" name="bref">
+		<property name="y" value="20" />
+	</bean>
+	
+	# declaring Object 'A' bean
+	<bean class="com.springcore.ref.A" name="aref">
+		<property name="x" value="30" />
+		<property name="ob" ref="bref" />
+	</bean>
+	
+	# can also use P schema as well
+	<bean class="com.springcore.ref.A" name="aref" p:x="30" p:ob-ref="bref"></bean>
+
+# Till now we are setting bean property using setter injection but here we will use Constructor Injection
+
+------------------ Constructor Injection -------------------------
+
+#value as element	
+		
+		<constructor-arg>
+			<value>kamal</value>
+		</constructor-arg>
+		<constructor-arg>
+			<value>12</value>
+		</constructor-arg>
+		
+#value as attribute
+
+	<constructor-arg value="kamal" />
+	<constructor-arg value="12" type="int" />
+	<constructor-arg ref="certiref" />
+	
+#using c schema	
+---- also include this line in beans tag : xmlns:c="http://www.springframework.org/schema/c"
+
+<bean class="com.springcore.consinject.Certificate" name="certiref" c:course="java" c:duration="6 month"></bean>	
+		
+
+---------------------- LifeCycle Methods ---------------------
+
+Spring provides two life cycle methods :
+	1. init() -> public void init()
+	we can provide any name instead of init but method signature must be same
+	
+	2.destroy -> public void destroy()
+	we can provide any name instead of destroy but method signature must be same
+	
+	
+	**Ways to use init and destroy in our program**
+	
+	1. using annotation
+	We can use @PostConstruct and @PreDestroy annotations in our class on our defined init and destroy methods.
+	Note : from java 9 both annotations are deprecated and to use them in our project we have to add extra dependencies
+	<dependency>
+			<groupId>javax.annotation</groupId>
+			<artifactId>javax.annotation-api</artifactId>
+			<version>1.3.2</version>
+		</dependency> 
+	Also to enable annotation we have to use this tag in xml : <context:annotation-config/>
+	If we don't want to use this tag : <context:annotation-config/> then we have to create a bean in xml file
+	<bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor" />
+	
+	2. using xml
+		just define init and destroy method in ur class and define in xml file like this.
+		<bean class="com.springcore.lifecycle.Samosa" name="samosa" p:price="10" init-method="init" destroy-method="destroy" />
+		
+	3. by implementing InitializingBean and Disposable Interface
+		just implement both InitializingBean and Disposable Interface in ur class and no need to use any annotation or 
+		defining under xml, spring will automatically do the things.
+	
+		Note: init is called automatically but destroy isn't, to call destroy we have to call close() method of ApplicationContext
+			implementation classes. ApplicationContext doesn't have close() method but all of its implementation classes have.
+			Also we can use AbstractApplicationContext class which provides abstract implementation of ApplicationContext Interface.
+			It have 'registerShutdownHook()' method to close IOC container object. To see hierarchy chart check resource folder.
+			
+----------------------- AutoWiring -------------------------------------
+
+Definition : 
+	The Spring framework can inject dependencies automatically. The Spring container detects those dependencies 
+	specified in the configuration file and @ the relationship between the beans. This is referred to as autowiring in Spring.
+	Note: Autowiring works for Reference type only.
+	
+	Reference : https://www.geeksforgeeks.org/spring-autowiring/
+	
+	** Ways to do autowiring **
+	
+	Example for explanation: We are taking an Employee class with Address class reference as dependency in it.
+	
+	1. using XML(in xml bydeafult autowire is set to no)
+		1.byName:
+			To use this autowiring technique the dependency reference variable name must be same what we declared in xml.
+			uses setter method to set value.
+			
+			<bean class="com.springcore.autowire.Employee" name="emp" autowire="byName"/>
+			<bean class="com.springcore.autowire.Address" name="address" p:street="9/224" p:city="delhi"/>
+			
+		2.byType
+			It doesn't depend upon dependency reference variable name but type must be same means we should have a bean in xml
+			file which have type Address which Employee needed as it dependency.
+			uses setter method to set value.
+			
+			<bean class="com.springcore.autowire.Employee" name="emp" autowire="byType"/>
+			<bean class="com.springcore.autowire.Address" name="addre" p:street="9/224" p:city="delhi"/>
+			
+		3.constructor
+			It uses constructor to set value but if it failed to find constructor with single argument as dependency it will
+			return null also the name of argument in constructor must be same as name of bean in xml file.
+	2. Using annotation
+		1.			
+
+Important: 
+	1. If we are using setter injection then to create bean object, IOC container will always use default constructor.
+		creation of bean happen always with constructor only =>  Engine engine = new Engine();
+		and after creation of bean object it will set its properties using setter injection, according to xml config.
+		
+	2.But if we define our own parameterized constructor in place of default constructor, then IOC container will
+	not be able to create the bean object and will through the exception.
+	So to deal with such situation we should always create a non-parameterized/default constructor explicitly.
+	
+	3.If we use constructor injection instead of setter, IOC container will use that constructor which is required
+	by xml cofig file instead of default.
+	
+	4.If use @Autowired on parameterized constructor then IOC will not require default constructor, but if we are using 
+	@Autowired on reference/property or method then IOC container will require default constructor.
+	
+	5. When we are using @Autowired annotation, on setter method or constructor, internally IOC will always try to resolve 'byType'
+	first and if we have two bean object of same type in config.xml then it will try to resolve 'byName', but if that also fails 
+	then it will throw exception. In below example we have two beans of same type Engine and their name also doesn't match with any 
+	reference name in class file as well.
+	<bean class="com.springcore.autowireannotation.Engine" name="engine1" p:name="V8"/>
+	<bean class="com.springcore.autowireannotation.Engine" name="engine2" p:name="V6"/>
+	
+	6. To resolve above issue we can use '@Qualifier("bean name which we want to use")' on setter/constructor/property
+	
+	
+---------------------------- loading data from propereties file ---------------------------
+	1. We just need to create .properties file in classpath means src folder.
+	2. set bean property value = "${student.name/whatever key u have used in properties file}"
+		<bean class="com.springcore.loadingfrompropertyfile.Student" name="student" 
+		p:name="${student.name}"
+		p:interestedCourse="${student.interestedCourse}" 
+		p:hobby="${student.hobby}" />
+	3. Use this tag to read data from .properties file: 
+		<context:property-placeholder location="student-info.properties"/>
+		
+	4.If u don't want to set bean property value using xml	then u can use @Value("pass some value") annotation on top of setter methods
+	 Just don't forget to add this tag in xml file: <context:annotation-config/> 
+	 
+	5. @Required annotation is deprecated.
+	
+------------------------------------ Spring annotations ---------------------------
+
+1.@Component
+	a. If we don't want to use bean tag in xml to define bean, we simply can use @Component annotation on a class.
+		@Component("collegeBean")
+		public class College {
+
+		}
+	so spring will create a bean with reference name same as Class name. College college = new College();(if not provide any name explicitly)
+	But to read @Component annotation spring need some path. Means which package classes it should search for @Component annotation
+	Therefore we provide this tag in xml : 
+		<context:component-scan base-package="com.springcore.common_annotation" />
+		
+2.@Configuration, @ComponentScan		
+	b.If we want to completely remove xml file and follow java based configuration
+		1.create CollegeConfig class, to tell spring that this your configuration class use:  @Configuration annotation
+		2.To told spring which packages to search for @Component use: @ComponentScan(basePackages = "com.springcore.common_annotation")	
+		
+3. @Bean
+	a. If we don't want to use @Component to create bean object, we can create a method which will return needed class Object
+		in configuration class and use @Bean annotation upon it. Bydefault MethodName will used as reference name until defined explicitly.
+		When we use @Bean to create bean object then there is no need for @ComponentScan on Configuration class.
+		
+		@Configuration
+		public class CollegeConfig {
+		
+			@Bean(name = "college")
+			public College collegeBean() { 
+				return new College();
+			}
+		}		
+
+4.@PropertySource
+	If we want to read data from a property file then we have to use : @PropertySource annotation on Configuration class.
+	But remember we need to provide property file name as well like : @PropertySource("student-info.properties") 
+	and property file should be in classPath.		
+			
+5. @Primary
+	If we have multiple beans which are fulfilling the same dependency then to resolve this issue we should use @Qualifier
+	annotation but in case @Qualifier is not set and we want to declare a bean as default then we can use @Primary annotation.
+NOTE: If we are creating standalone App then creation  and closing of container, we have to do manually but in web app
+	we don't need to do so. 	
+Note: IOC container makes all bean object present in xml config file and set their properties automatically even if we are not calling.		
+		

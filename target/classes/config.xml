@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	https://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/context 
+	http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<bean class="com.springcore.bean.Student" name="student1"
+		p:studentId="101" p:studentName="kamal" p:studentAddress="delhi" />
+
+	<bean class="com.springcore.bean.Teacher" name="teacher"
+		p:name="Raj" />
+
+	<!-- second bean of student -->
+	<bean class="com.springcore.bean.Student" name="student2" lazy-init="true">
+		<property name="studentId" value="102" />
+		<property name="studentName" value="raman" />
+		<property name="studentAddress" value="goa" />
+	</bean>
+	
+</beans>
